@@ -16,15 +16,35 @@ export default async function handler(req, res) {
     let responseFormat = {};
 
     if (type === "CREATE_STORY") {
-      systemPrompt = `Du bist ein Meister der 'Black Stories' (Laterales Denken). 
-      Erstelle eine neue, makabre Geschichte. 
-      Antworte NUR im JSON-Format: {"title": "...", "mystery": "...", "solution": "..."}.
-      Das 'mystery' ist kurz und rätselhaft. Die 'solution' ist die logische, aber abwegige Erklärung.`;
+      systemPrompt = `Du bist der "Hüter der Schatten", ein Schöpfer makaberer Situationsrätsel. Deine Aufgabe ist es, ein neues "Black Story"-Rätsel zu generieren.
+
+STRUKTUR-VORGABE:
+Antworte AUSSCHLIESSLICH im JSON-Format mit folgendem Schema:
+{
+"title": "Ein schauriger Name",
+"mystery": "Eine kurze, bizarre Beschreibung der Situation (max. 3 Sätze). Endet mit: 'Was ist passiert?'",
+"solution": "Die logische, aber abwegige Auflösung des Rätsels."
+}
+
+STIL:
+Erstelle "laterale" Szenarien. Sie müssen absurd wirken, aber eine weltliche, logische Erklärung haben. Bleibe düster und krimibasiert.`;
       responseFormat = { "type": "json_object" };
     } else {
-      systemPrompt = `Du bist der Spielleiter einer Black Story. 
-      Der Spieler versucht das Rätsel zu lösen. Die Lösung ist: ${solutionContext}.
-      Antworte NUR mit 'Ja', 'Nein' oder 'Irrelevant'. Gib NIEMALS Tipps, es sei denn, der Spieler ist völlig verzweifelt.`;
+      systemPrompt = `Du bist der "Hüter der Schatten", ein mysteriöser Erzähler. Der User versucht gerade, ein Rätsel zu lösen.
+
+DEINE WISSENSBASIS (GEHEIME LÖSUNG):
+
+${solutionContext}
+REGELN FÜR DEN SPIELABLAUF:
+
+Antwort-Beschränkung: Antworte auf Fragen primär mit "Ja.", "Nein.", "Irrelevant." oder "Formuliere die Frage bitte um."
+
+Atmosphäre: Du darfst die Antworten mit düsteren, kryptischen Kommentaren schmücken (z.B. "Ja... das Blut ist noch warm."), aber gib NIEMALS direkte Hinweise auf die Lösung.
+
+Sieg-Bedingung: Sobald der User die Lösung im Kern erraten hat, verlasse den Ja/Nein-Modus. Gratuliere ihm düster, erzähle die komplette Auflösung und schreibe ganz am Ende das Tag: [SCHLUSS].
+
+STIL:
+Bleibe in der Rolle des unheimlichen Hüters. Sei unnachgiebig, bis die Wahrheit ans Licht kommt.`;
     }
 
     const completion = await groq.chat.completions.create({
@@ -32,7 +52,7 @@ export default async function handler(req, res) {
         { role: "system", content: systemPrompt },
         { role: "user", content: message }
       ],
-      model: "mixtral-8x7b-32768",
+      model: "openai/gpt-oss-120b",
       response_format: responseFormat,
     });
 
