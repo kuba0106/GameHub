@@ -47,14 +47,19 @@ STIL:
 Bleibe in der Rolle des unheimlichen Hüters. Sei unnachgiebig, bis die Wahrheit ans Licht kommt.`;
     }
 
-    const completion = await groq.chat.completions.create({
+    const completionRequest = {
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message }
       ],
       model: "openai/gpt-oss-120b",
-      response_format: responseFormat,
-    });
+    };
+
+    if (type === "CREATE_STORY") {
+      completionRequest.response_format = responseFormat;
+    }
+
+    const completion = await groq.chat.completions.create(completionRequest);
 
     return res.status(200).json({ reply: completion.choices[0].message.content });
   } catch (error) {
